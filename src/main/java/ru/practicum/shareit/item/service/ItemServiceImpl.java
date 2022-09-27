@@ -106,7 +106,7 @@ public class ItemServiceImpl implements ItemService {
         }
         return itemRepository.findAllItems()
                 .stream()
-                .filter(item -> item.getOwner().getId() == userId)
+                .filter(item -> item.getOwner().getId().equals(userId))
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
