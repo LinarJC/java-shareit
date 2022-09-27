@@ -18,9 +18,8 @@ import static ru.practicum.shareit.user.UserMapper.toUserDto;
 
 @Slf4j
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final InMemoryUserRepository userRepository;
-
     @Autowired
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = (InMemoryUserRepository) userRepository;

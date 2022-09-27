@@ -18,6 +18,7 @@ public class InMemoryUserRepository implements UserRepository {
     private Map<Long, User> users = new HashMap<>();
     private Set<String> emails = new HashSet<>();
     private long id;
+
     @Override
     public User addUser(User user) {
         id++;

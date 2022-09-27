@@ -13,6 +13,7 @@ public class ItemMapper {
                 item.getAvailable(),
                 item.getRequest());
     }
+
     public static Item toItem(ItemDto itemDto, User owner) {
         return new Item(
                 itemDto.getId(),

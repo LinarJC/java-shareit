@@ -16,6 +16,7 @@ import java.util.Map;
 public class InMemoryItemRepository implements ItemRepository {
     private final Map<Long, Item> items = new HashMap<>();
     private long id;
+
     @Override
     public Item addItem(Item item) {
         item.setId(++id);

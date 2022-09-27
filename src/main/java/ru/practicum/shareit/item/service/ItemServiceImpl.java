@@ -22,7 +22,7 @@ import static ru.practicum.shareit.item.ItemMapper.toItemDto;
 
 @Slf4j
 @Service
-public class ItemServiceImpl implements ItemService{
+public class ItemServiceImpl implements ItemService {
     private final InMemoryItemRepository itemRepository;
     private final InMemoryUserRepository userRepository;
 
@@ -94,7 +94,7 @@ public class ItemServiceImpl implements ItemService{
     }
 
     @Override
-    public void removeItem(Long id){
+    public void removeItem(Long id) {
         itemRepository.removeItem(itemRepository.findItem(id));
         log.info("Вещь ID '{}' удалена", id);
     }

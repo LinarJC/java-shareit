@@ -12,13 +12,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleThrowable (final MethodArgumentNotValidException e) {
+    public ErrorResponse handleThrowable(final MethodArgumentNotValidException e) {
         log.info("400 {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundThrowable (final NotFoundException e) {
+    public ErrorResponse handleNotFoundThrowable(final NotFoundException e) {
         log.info("404 {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
