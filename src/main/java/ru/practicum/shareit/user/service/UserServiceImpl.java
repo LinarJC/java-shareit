@@ -20,6 +20,7 @@ import static ru.practicum.shareit.user.UserMapper.toUserDto;
 @Service
 public class UserServiceImpl implements UserService {
     private final InMemoryUserRepository userRepository;
+
     @Autowired
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = (InMemoryUserRepository) userRepository;
