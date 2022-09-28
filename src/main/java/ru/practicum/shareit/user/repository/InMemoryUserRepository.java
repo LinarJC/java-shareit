@@ -3,8 +3,12 @@ package ru.practicum.shareit.user.repository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
@@ -18,6 +22,9 @@ public class InMemoryUserRepository implements UserRepository {
     private Map<Long, User> users = new HashMap<>();
     private Set<String> emails = new HashSet<>();
     private long id;
+    @Autowired
+    private UserMapper userMapper;
+
     @Override
     public User addUser(User user) {
         id++;
@@ -46,13 +53,20 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public Collection<User> findAllUsers() {
-        return users.values();
+    public List<UserDto> findAllUsers() {
+        List<UserDto> userDtos = new ArrayList<>();
+            for (User user: users.values()) {
+                userDtos.add(userMapper.toUserDto(user));
+            }
+        return userDtos;
     }
 
     @Override
-    public User findUser(Long userId) {
-        return users.getOrDefault(userId, null);
+    public UserDto findUser(Long userId) {
+        if (users.get(userId) == null) {
+            throw new NotFoundException("Пользователь с данным Id не найден");
+        }
+        return userMapper.toUserDto(users.get(userId));
     }
 
     @Override

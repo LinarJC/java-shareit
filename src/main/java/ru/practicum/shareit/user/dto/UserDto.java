@@ -21,7 +21,4 @@ public class UserDto {
     @NotBlank(groups = {Create.class})
     @Email(groups = {Create.class, Update.class})
     private String email;
-
-    public UserDto(String name, String email) {
-    }
 }
