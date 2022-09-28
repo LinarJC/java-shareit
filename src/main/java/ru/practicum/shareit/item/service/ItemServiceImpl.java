@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ItemServiceImpl implements ItemService{
+public class ItemServiceImpl implements ItemService {
     private final InMemoryItemRepository itemRepository;
     private final InMemoryUserRepository userRepository;
     @Autowired
@@ -81,7 +81,7 @@ public class ItemServiceImpl implements ItemService{
     }
 
     @Override
-    public void removeItem(Long id){
+    public void removeItem(Long id) {
         itemRepository.removeItem(id);
         log.info("Вещь ID '{}' удалена", id);
     }
