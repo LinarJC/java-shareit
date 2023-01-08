@@ -18,7 +18,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,11 +30,11 @@ public class BookingServiceImpl implements BookingService {
     private final BookingMapper mapper;
 
     @Override
-    public BookingDto findById(Long bookingId, Long userId) {
+    public BookingDto findById(Long bookingId, long userId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new StorageException("Ошибка"));
-        if (!Objects.equals(booking.getBooker().getId(), userId)
-                && !Objects.equals(booking.getItem().getOwner().getId(), userId)) {
+        if (booking.getBooker().getId() != userId
+                && booking.getItem().getOwner().getId() !=userId) {
             throw new StorageException("Ошибка");
         }
         return mapper.toBookingDto(booking);
@@ -81,7 +80,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDto save(BookingDtoSimple bookingDtoSimple, Long userId) {
+    public BookingDto save(BookingDtoSimple bookingDtoSimple, long userId) {
         if (bookingDtoSimple.getEnd().isBefore(bookingDtoSimple.getStart())) {
             throw new BookingException("Incorrect end time");
         }
@@ -94,7 +93,7 @@ public class BookingServiceImpl implements BookingService {
             throw new ItemException("Вещь с Id = " + bookingDtoSimple.getItemId() +
                     " не доступна для аренды");
         }
-        if (Objects.equals(item.getOwner().getId(), userId)) {
+        if (item.getOwner().getId() == userId) {
             throw new StorageException("Владелец вещи не может забронировать свою вещь");
         } else {
             booking.setItem(item);
@@ -129,9 +128,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDto approve(Long userId, Long bookingId, Boolean approved) {
+    public BookingDto approve(long userId, Long bookingId, Boolean approved) {
         BookingDto bookingDto = mapper.toBookingDto(bookingRepository.findById(bookingId).orElseThrow());
-        if (!Objects.equals(bookingDto.getItem().getOwner().getId(), userId)) {
+        if (bookingDto.getItem().getOwner().getId() != userId) {
             throw new StorageException("Подтвердить бронирование может только владелец вещи");
         }
         if (bookingDto.getStatus().equals(Status.APPROVED)) {

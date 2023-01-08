@@ -8,13 +8,13 @@ import java.util.List;
 
 public interface ItemService {
 
-    ItemDtoWithBooking findById(Long itemId, Long userId);
+    ItemDtoWithBooking findById(Long itemId, long userId);
 
     List<ItemDtoWithBooking> findAll(Long userId);
 
     ItemDto save(ItemDto itemDto, Long userId);
 
-    ItemDto update(ItemDto itemDto, Long userId, Long id);
+    ItemDto update(ItemDto itemDto, long userId, Long id);
 
     void deleteById(Long itemId);
 

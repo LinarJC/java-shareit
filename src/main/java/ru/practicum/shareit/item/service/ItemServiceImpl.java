@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDtoForItem;
@@ -27,7 +26,6 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -56,12 +54,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDtoWithBooking findById(Long itemId, Long userId) {
+    public ItemDtoWithBooking findById(Long itemId, long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new StorageException("Вещь с ID " + itemId + " не найден"));
         ItemDtoWithBooking itemDtoWithBooking = itemMapper
                 .toItemDtoWithBooking(item);
-        if (Objects.equals(item.getOwner().getId(), userId)) {
+        if (item.getOwner().getId() == userId) {
             createItemDtoWithBooking(itemDtoWithBooking);
         }
         List<Comment> comments = commentRepository.findAllByItemId(itemId);
@@ -121,12 +119,19 @@ public class ItemServiceImpl implements ItemService {
                 new StorageException("Вещи с Id = " + itemId + " нет в БД"));
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new StorageException("Пользователя с Id = " + userId + " нет в БД"));
-        Booking booking = new Booking();
-        booking.setItem(item);
-        booking.setBooker(user);
-        booking.setStatus(Status.APPROVED);
-        Example<Booking> example = Example.of(booking);
-        if (bookingRepository.exists(example)) {
+//        Booking booking = new Booking();
+//        booking.setItem(item);
+//        booking.setBooker(user);
+//        booking.setStatus(Status.APPROVED);
+//        Example<Booking> example = Example.of(booking);
+//
+//        if (bookingRepository.exists(example)
+//                && bookingRepository.findOne(example).get().getEnd().isBefore(LocalDateTime.now())) {
+//            throw new BookingException("Пользователь с Id = " + userId + " не брал в аренду вещь с Id = " + itemId);
+//        }
+        if (bookingRepository.searchByBookerIdAndItemIdAndEndIsBefore(userId, itemId, LocalDateTime.now())
+                .stream().noneMatch(booking -> booking.getStatus().equals(Status.APPROVED))
+        ) {
             throw new BookingException("Пользователь с Id = " + userId + " не брал в аренду вещь с Id = " + itemId);
         }
         Comment comment = commentMapper.toComment(commentDto);
@@ -136,11 +141,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto update(ItemDto itemDto, Long userId, Long id) {
+    public ItemDto update(ItemDto itemDto, long userId, Long id) {
         try {
             Item oldItem = itemRepository.findById(id).orElseThrow();
 
-            if (Objects.equals(oldItem.getOwner().getId(), userId)) {
+            if (oldItem.getOwner().getId() == userId) {
 
                 if (itemDto.getName() != null) {
                     oldItem.setName(itemDto.getName());
