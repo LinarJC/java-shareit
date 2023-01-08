@@ -27,21 +27,21 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingDto> findAll(@RequestHeader("X-Sharer-User-Id") long userId,
+    public List<BookingDto> findAll(@RequestHeader("X-Sharer-User-Id") Long userId,
                                     @RequestParam(defaultValue = "ALL") String state) {
         return bookingService.findAll(userId, state);
     }
 
 
     @GetMapping("/owner")
-    public List<BookingDto> findAllByOwner(@RequestHeader("X-Sharer-User-Id") long userId,
+    public List<BookingDto> findAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
                                            @RequestParam(defaultValue = "ALL") String state) {
         return bookingService.findAllByItemOwnerId(userId, state);
     }
 
     @PostMapping
     public BookingDto create(@Valid @RequestBody BookingDtoSimple bookingDtoSimple,
-                             @RequestHeader("X-Sharer-User-Id") long userId) {
+                             @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Получен запрос к эндпоинту: '{} {}', Бронирование: ItemId: {}", "POST", "/bookings",
                 bookingDtoSimple.getItemId());
         return bookingService.save(bookingDtoSimple, userId);
@@ -49,21 +49,21 @@ public class BookingController {
 
 
     @PatchMapping("/{bookingId}")
-    public BookingDto approve(@RequestHeader("X-Sharer-User-Id") long userId,
-                              @PathVariable long bookingId, @RequestParam Boolean approved) {
+    public BookingDto approve(@RequestHeader("X-Sharer-User-Id") Long userId,
+                              @PathVariable Long bookingId, @RequestParam Boolean approved) {
         log.info("Получен запрос к эндпоинту: '{} {}', Подтверждение бронирование: ID: {}", "PATCH", "/bookings",
                 bookingId);
         return bookingService.approve(userId, bookingId, approved);
     }
 
     @GetMapping("/{id}")
-    public BookingDto findById(@PathVariable long id, @RequestHeader("X-Sharer-User-Id") long userId) {
+    public BookingDto findById(@PathVariable Long id, @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("GET booking id={}", id);
         return bookingService.findById(id, userId);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable long id) {
+    public void deleteById(@PathVariable Long id) {
         bookingService.deleteById(id);
     }
 

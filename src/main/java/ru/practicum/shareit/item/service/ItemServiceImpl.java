@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDtoForItem;
@@ -63,12 +64,10 @@ public class ItemServiceImpl implements ItemService {
             createItemDtoWithBooking(itemDtoWithBooking);
         }
         List<Comment> comments = commentRepository.findAllByItemId(itemId);
-        if (!comments.isEmpty()) {
-            itemDtoWithBooking.setComments(comments
-                    .stream().map(commentMapper::toCommentDto)
-                    .collect(Collectors.toList())
-            );
-        }
+        itemDtoWithBooking.setComments(comments
+                .stream().map(commentMapper::toCommentDto)
+                .collect(Collectors.toList())
+        );
         return itemDtoWithBooking;
     }
 
@@ -93,14 +92,14 @@ public class ItemServiceImpl implements ItemService {
 
     private void createItemDtoWithBooking(ItemDtoWithBooking itemDtoWithBooking) {
         List<Booking> lastBookings = bookingRepository
-                .findBookingsByItemIdAndEndIsBeforeOrderByEndDesc(itemDtoWithBooking.getId(),
+                .findByItemIdAndEndIsBeforeOrderByEndDesc(itemDtoWithBooking.getId(),
                         LocalDateTime.now());
         if (!lastBookings.isEmpty()) {
             BookingDtoForItem lastBooking = bookingMapper.toBookingDtoForItem(lastBookings.get(0));
             itemDtoWithBooking.setLastBooking(lastBooking);
         }
         List<Booking> nextBookings = bookingRepository
-                .findBookingsByItemIdAndStartIsAfterOrderByStartDesc(itemDtoWithBooking.getId(),
+                .findByItemIdAndStartIsAfterOrderByStartDesc(itemDtoWithBooking.getId(),
                         LocalDateTime.now());
         if (!nextBookings.isEmpty()) {
             BookingDtoForItem nextBooking = bookingMapper.toBookingDtoForItem(nextBookings.get(0));
@@ -111,12 +110,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto save(ItemDto itemDto, Long userId) {
         Item item = itemMapper.toItem(itemDto);
-        try {
-            item.setOwner(userRepository.findById(userId).orElseThrow());
+            item.setOwner(userRepository.findById(userId).orElseThrow(() -> new StorageException("Incorrect userId")));
             return itemMapper.toItemDto(itemRepository.save(item));
-        } catch (Exception exception) {
-            throw new StorageException("Incorrect userId");
-        }
     }
 
     @Override
@@ -125,9 +120,12 @@ public class ItemServiceImpl implements ItemService {
                 new StorageException("Вещи с Id = " + itemId + " нет в БД"));
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new StorageException("Пользователя с Id = " + userId + " нет в БД"));
-        if (bookingRepository.searchBookingByBookerIdAndItemIdAndEndIsBefore(userId, itemId, LocalDateTime.now())
-                .stream().noneMatch(booking -> booking.getStatus().equals(Status.APPROVED))
-        ) {
+        Booking booking = new Booking();
+        booking.setItem(item);
+        booking.setBooker(user);
+        booking.setStatus(Status.APPROVED);
+        Example<Booking> example = Example.of(booking);
+        if (bookingRepository.exists(example)) {
             throw new BookingException("Пользователь с Id = " + userId + " не брал в аренду вещь с Id = " + itemId);
         }
         Comment comment = commentMapper.toComment(commentDto);

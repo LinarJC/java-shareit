@@ -6,17 +6,17 @@ import java.util.List;
 
 public interface BookingService {
 
-    BookingDto findById(long bookingId, long userId);
+    BookingDto findById(Long bookingId, Long userId);
 
-    List<BookingDto> findAll(long userId, String state);
+    List<BookingDto> findAll(Long userId, String state);
 
-    BookingDto save(BookingDtoSimple bookingDtoSimple, long userId);
+    BookingDto save(BookingDtoSimple bookingDtoSimple, Long userId);
 
-    BookingDto update(long bookingId, BookingDto bookingDto);
+    BookingDto update(Long bookingId, BookingDto bookingDto);
 
-    void deleteById(long bookingId);
+    void deleteById(Long bookingId);
 
-    BookingDto approve(long userId, long bookingId, Boolean approved);
+    BookingDto approve(Long userId, Long bookingId, Boolean approved);
 
-    List<BookingDto> findAllByItemOwnerId(long userId, String state);
+    List<BookingDto> findAllByItemOwnerId(Long userId, String state);
 }
