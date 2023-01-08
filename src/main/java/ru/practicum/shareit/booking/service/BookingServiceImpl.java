@@ -35,7 +35,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new StorageException("Ошибка"));
         if (!Objects.equals(booking.getBooker().getId(), userId)
-                && booking.getItem().getOwner().getId() != userId) {
+                && !Objects.equals(booking.getItem().getOwner().getId(), userId)) {
             throw new StorageException("Ошибка");
         }
         return mapper.toBookingDto(booking);

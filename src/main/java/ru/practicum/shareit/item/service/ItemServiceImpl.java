@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -60,7 +61,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new StorageException("Вещь с ID " + itemId + " не найден"));
         ItemDtoWithBooking itemDtoWithBooking = itemMapper
                 .toItemDtoWithBooking(item);
-        if (item.getOwner().getId() == userId) {
+        if (Objects.equals(item.getOwner().getId(), userId)) {
             createItemDtoWithBooking(itemDtoWithBooking);
         }
         List<Comment> comments = commentRepository.findAllByItemId(itemId);
@@ -139,7 +140,7 @@ public class ItemServiceImpl implements ItemService {
         try {
             Item oldItem = itemRepository.findById(id).orElseThrow();
 
-            if (oldItem.getOwner().getId() == userId) {
+            if (Objects.equals(oldItem.getOwner().getId(), userId)) {
 
                 if (itemDto.getName() != null) {
                     oldItem.setName(itemDto.getName());
