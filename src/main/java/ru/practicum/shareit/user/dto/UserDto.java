@@ -1,24 +1,20 @@
 package ru.practicum.shareit.user.dto;
 
-import lombok.*;
-import ru.practicum.shareit.Create;
-import ru.practicum.shareit.Update;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
-@Getter
-@Setter
-@ToString
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserDto {
     private Long id;
-    @NotBlank(groups = {Create.class})
+    @NotBlank(message = "Поле имя не может быть пустым")
     private String name;
-    @NotNull(groups = {Create.class})
-    @NotBlank(groups = {Create.class})
-    @Email(groups = {Create.class, Update.class})
+    @Email(message = "Некорректный email")
+    @NotBlank(message = "email не может быть пустым")
     private String email;
 }
