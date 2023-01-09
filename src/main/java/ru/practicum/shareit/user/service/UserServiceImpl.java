@@ -1,69 +1,64 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.DuplicateEmailFoundException;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.StorageException;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.repository.InMemoryUserRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final InMemoryUserRepository userRepository;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+
     @Autowired
-    private UserMapper userMapper;
-
-    public UserDto getUser(Long userId) {
-        return userRepository.findUser(userId);
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
-    public List<UserDto> getAllUsers() {
-        return userRepository.findAllUsers();
+    @Override
+    public UserDto findById(Long userId) {
+        return userMapper.toUserDto(userRepository.findById(userId)
+                .orElseThrow(() -> new StorageException("Пользователь с ID " + userId + " не найден")));
     }
 
-    public UserDto createUser(UserDto userDto) {
-        validate(userDto);
-        userDto.setId(userRepository.getId() + 1);
-        userRepository.addUser(userMapper.toUser(userDto));
+    @Override
+    public List<UserDto> findAll() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toUserDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public UserDto save(UserDto userDto) {
         log.info("Добавлен новый пользователь: '{}', ID '{}', '{}'", userDto.getName(), userDto.getId(), userDto.getEmail());
-        return userDto;
+        return userMapper.toUserDto(userRepository.save(userMapper.toUser(userDto)));
     }
 
-    public UserDto updateUser(UserDto userDto, Long id) {
-        userDto.setId(id);
-        if (!userRepository.isExist(userMapper.toUser(userDto))) {
-            throw new NotFoundException("Пользователь с данным Id " + id + " не найден");
+    @Override
+    public UserDto update(Long userId, UserDto userDto) {
+        UserDto oldUserDto = findById(userId);
+        if (userDto.getName() != null) {
+            oldUserDto.setName(userDto.getName());
         }
-        if (userDto.getName() == null) {
-            userDto.setName(userRepository.findUser(id).getName());
+        if (userDto.getEmail() != null) {
+            oldUserDto.setEmail(userDto.getEmail());
         }
-        if (userDto.getEmail() == null) {
-            userDto.setEmail(userRepository.findUser(id).getEmail());
-        } else {
-            validate(userDto);
-        }
-        userRepository.updateUser(userMapper.toUser(userDto));
         log.info("Внесены изменения в данные пользователя: '{}', ID '{}', '{}'",
                 userDto.getName(), userDto.getId(), userDto.getEmail());
-        return userDto;
+        return userMapper.toUserDto(userRepository.save(userMapper.toUser(oldUserDto)));
     }
 
-    public void removeUser(Long id) {
-        userRepository.removeUser(userMapper.toUser(userRepository.findUser(id)));
-        log.info("Пользователь ID '{}' удален", id);
-    }
-
-    public void validate(UserDto userDto) {
-        if (userRepository.isExistEmail(userDto.getEmail())) {
-            throw new DuplicateEmailFoundException("Пользователь с данным E-mail уже есть в базе.");
-        }
-        log.info("Проведена валидация данных пользователя: '{}'", userDto);
+    @Override
+    public void deleteById(Long userId) {
+        userRepository.deleteById(userId);
+        log.info("Пользователь ID '{}' удален", userId);
     }
 }
