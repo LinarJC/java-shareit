@@ -10,7 +10,7 @@ public interface ItemService {
 
     ItemDtoWithBooking findById(Long itemId, long userId);
 
-    List<ItemDtoWithBooking> findAll(Long userId);
+    List<ItemDtoWithBooking> findAll(Long userId, int from, int size);
 
     ItemDto save(ItemDto itemDto, Long userId);
 
@@ -18,7 +18,7 @@ public interface ItemService {
 
     void deleteById(Long itemId);
 
-    List<ItemDto> searchItem(String text);
+    List<ItemDto> searchItem(String text, int from, int size);
 
     CommentDto saveComment(Long userId, Long itemId, CommentDto commentDto);
 }

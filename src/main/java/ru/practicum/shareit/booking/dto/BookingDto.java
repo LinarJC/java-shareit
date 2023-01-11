@@ -1,8 +1,5 @@
 package ru.practicum.shareit.booking.dto;
 
-/**
- * TODO Sprint add-bookings.
- */
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +14,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BookingDto {
-
     private Long id;
     @NotNull
     private LocalDateTime start;
@@ -26,5 +22,4 @@ public class BookingDto {
     private Item item;
     private User booker;
     private Status status;
-
 }
