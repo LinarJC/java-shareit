@@ -13,11 +13,11 @@ import javax.validation.constraints.NotNull;
 public class ItemDto {
 
     private Long id;
-    @NotBlank(message = "name should not be blank")
     @NotNull
+    @NotBlank(message = "name should not be blank")
     private String name;
     @NotNull
-    @NotBlank(message = "name should not be blank")
+    @NotBlank(message = "description should not be blank")
     private String description;
     @NotNull
     private Boolean available;

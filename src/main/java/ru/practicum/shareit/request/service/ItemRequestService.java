@@ -12,5 +12,5 @@ public interface ItemRequestService {
 
     ItemRequestDtoWithItems findById(long userId, long itemRequestId);
 
-    List<ItemRequestDtoWithItems> findAllWithPageable(long userId, int from, int size);
+    List<ItemRequestDtoWithItems> findAll(long userId, int from, int size);
 }

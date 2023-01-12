@@ -44,7 +44,7 @@ public class ItemRequestController {
     public List<ItemRequestDtoWithItems> findByRequestId(@RequestHeader("X-Sharer-User-Id") long userId,
                                                          @RequestParam(defaultValue = "0") @Min(0) int from,
                                                          @RequestParam(defaultValue = "20") @Positive int size) {
-        return service.findAllWithPageable(userId, from, size);
+        return service.findAll(userId, from, size);
     }
 
     @GetMapping("/{requestId}")

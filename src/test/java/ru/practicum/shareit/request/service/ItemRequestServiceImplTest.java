@@ -109,7 +109,7 @@ class ItemRequestServiceImplTest {
                 .findAll(PageRequest.of(0, 20, Sort.by("created"))))
                 .thenReturn(Page.empty());
         final List<ItemRequestDtoWithItems> itemRequestDtoWithItems = itemRequestService
-                .findAllWithPageable(itemRequest.getRequestor().getId(), 0, 20);
+                .findAll(itemRequest.getRequestor().getId(), 0, 20);
         assertNotNull(itemRequestDtoWithItems);
         assertTrue(itemRequestDtoWithItems.isEmpty());
         verify(itemRequestRepository, times(1))
