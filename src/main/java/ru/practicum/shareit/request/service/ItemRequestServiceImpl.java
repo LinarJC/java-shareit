@@ -39,7 +39,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDtoWithItems> findAll(long userId) {
         log.info("Запрошен метод поиска всех запросов по userId: {}", userId);
-        if(!userRepository.existsById(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new StorageException("Пользователя с Id = " + userId + " нет в БД");
         }
         return itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(userId)
@@ -51,7 +51,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public ItemRequestDtoWithItems findById(long userId, long itemRequestId) {
         log.info("Запрошен метод поиска запроса по userId: {} и itemRequestId: {}", userId, itemRequestId);
-        if(!userRepository.existsById(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new StorageException("Пользователя с Id = " + userId + " нет в БД");
         }
         ItemRequest itemRequest = itemRequestRepository
@@ -64,7 +64,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestDtoWithItems> findAll(long userId, int from, int size) {
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size, Sort.by("created"));
-        if(!userRepository.existsById(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new StorageException("Пользователя с Id = " + userId + " нет в БД");
         }
         return itemRequestRepository.findAll(pageable)
