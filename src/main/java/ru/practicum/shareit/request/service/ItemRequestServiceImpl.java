@@ -39,9 +39,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDtoWithItems> findAll(long userId) {
         log.info("Запрошен метод поиска всех запросов по userId: {}", userId);
-        if(!userRepository.existsById(userId)) {
-            throw new StorageException("Пользователя с Id = " + userId + " нет в БД");
-        }
+//        if (!userRepository.existsById(userId)) {
+//            throw new StorageException("Пользователя с Id = " + userId + " нет в БД");
+//        }
+        userRepository.findById(userId).orElseThrow(() ->
+                new StorageException("Пользователя с Id = " + userId + " нет в БД"));
         return itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(userId)
                 .stream()
                 .map(mapper::toItemRequestDtoWithItems)
@@ -51,9 +53,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public ItemRequestDtoWithItems findById(long userId, long itemRequestId) {
         log.info("Запрошен метод поиска запроса по userId: {} и itemRequestId: {}", userId, itemRequestId);
-        if(!userRepository.existsById(userId)) {
-            throw new StorageException("Пользователя с Id = " + userId + " нет в БД");
-        }
+        userRepository.findById(userId).orElseThrow(() ->
+                new StorageException("Пользователя с Id = " + userId + " нет в БД"));
         ItemRequest itemRequest = itemRequestRepository
                 .findById(itemRequestId).orElseThrow(() ->
                         new StorageException("Запроса с Id = " + itemRequestId + " нет в БД"));
@@ -64,9 +65,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestDtoWithItems> findAll(long userId, int from, int size) {
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size, Sort.by("created"));
-        if(!userRepository.existsById(userId)) {
-            throw new StorageException("Пользователя с Id = " + userId + " нет в БД");
-        }
+        userRepository.findById(userId).orElseThrow(() ->
+                new StorageException("Пользователя с Id = " + userId + " нет в БД"));
         return itemRequestRepository.findAll(pageable)
                 .stream()
                 .filter(itemRequest -> itemRequest.getRequestor().getId() != userId)
