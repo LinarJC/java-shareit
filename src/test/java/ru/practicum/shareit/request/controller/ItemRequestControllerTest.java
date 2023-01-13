@@ -101,7 +101,7 @@ class ItemRequestControllerTest {
         ItemRequestDtoWithItems itemRequestDtoWithItems = itemRequestMapper
                 .toItemRequestDtoWithItems(itemRequest);
         result.add(itemRequestDtoWithItems);
-        when(itemRequestService.findAllWithPageable(itemRequest.getRequestor().getId(),
+        when(itemRequestService.findAll(itemRequest.getRequestor().getId(),
                 0, 20))
                 .thenReturn(result);
         mockMvc.perform(get("/requests/all")
@@ -112,7 +112,7 @@ class ItemRequestControllerTest {
                 .andExpect(content().json("[{\"id\": 1," +
                         " \"description\": \"itemRequest1\"}]"));
         verify(itemRequestService, times(1))
-                .findAllWithPageable(itemRequest.getRequestor().getId(), 0, 20);
+                .findAll(itemRequest.getRequestor().getId(), 0, 20);
     }
 
     @Test

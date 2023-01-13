@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingMapper;
@@ -35,22 +34,22 @@ import static org.mockito.Mockito.*;
 class ItemServiceImplTest {
 
     private ItemService itemService;
-    @MockBean
     private ItemRepository itemRepository;
     private ItemMapper itemMapper;
-    @MockBean
     private UserRepository userRepository;
-    @MockBean
     private ItemRequestRepository itemRequestRepository;
-    @MockBean
     private BookingRepository bookingRepository;
-    @MockBean
     private CommentRepository commentRepository;
 
     private CommentMapper commentMapper;
 
     @BeforeEach
     void beforeEach() {
+        itemRepository = mock(ItemRepository.class);
+        userRepository = mock(UserRepository.class);
+        bookingRepository = mock(BookingRepository.class);
+        commentRepository = mock(CommentRepository.class);
+        itemRequestRepository = mock(ItemRequestRepository.class);
         itemMapper = new ItemMapper();
         BookingMapper bookingMapper = new BookingMapper();
         commentMapper = new CommentMapper();
