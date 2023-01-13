@@ -25,12 +25,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto findById(Long userId) {
+        log.info("Запрошен метод поиска запроса по userId: {}", userId);
         return userMapper.toUserDto(userRepository.findById(userId)
                 .orElseThrow(() -> new StorageException("Пользователь с ID " + userId + " не найден")));
     }
 
     @Override
     public List<UserDto> findAll() {
+        log.info("Запрошен метод поиска всех пользователей");
         return userRepository.findAll().stream()
                 .map(userMapper::toUserDto)
                 .collect(Collectors.toList());
@@ -38,12 +40,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto save(UserDto userDto) {
+        log.info("Запрошен метод сохранения объекта user");
         log.info("Добавлен новый пользователь: '{}', ID '{}', '{}'", userDto.getName(), userDto.getId(), userDto.getEmail());
         return userMapper.toUserDto(userRepository.save(userMapper.toUser(userDto)));
     }
 
     @Override
     public UserDto update(Long userId, UserDto userDto) {
+        log.info("Запрошен метод обновления userId: {}", userId);
         UserDto oldUserDto = findById(userId);
         if (userDto.getName() != null) {
             oldUserDto.setName(userDto.getName());
@@ -58,6 +62,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteById(Long userId) {
+        log.info("Запрошен метод удаления userId: {}", userId);
         userRepository.deleteById(userId);
         log.info("Пользователь ID '{}' удален", userId);
     }

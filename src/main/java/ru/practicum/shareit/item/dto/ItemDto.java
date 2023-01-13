@@ -7,21 +7,20 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-/**
- * TODO Sprint add-controllers.
- */
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemDto {
+
     private Long id;
-    @NotBlank(message = "Название вещи не может быть пустым")
     @NotNull
+    @NotBlank(message = "name should not be blank")
     private String name;
     @NotNull
-    @NotBlank(message = "Описание вещи не может быть пустым")
+    @NotBlank(message = "description should not be blank")
     private String description;
     @NotNull
     private Boolean available;
+
+    private Long requestId;
 }

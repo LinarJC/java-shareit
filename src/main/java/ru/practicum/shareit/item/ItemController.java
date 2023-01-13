@@ -9,11 +9,10 @@ import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Slf4j
 @RestController
 @RequestMapping("/items")
@@ -33,8 +32,10 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDtoWithBooking> findAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemService.findAll(userId);
+    public List<ItemDtoWithBooking> findAll(@RequestHeader("X-Sharer-User-Id") long userId,
+                                            @RequestParam(defaultValue = "0") @Min(0) int from,
+                                            @RequestParam(defaultValue = "20") @Positive int size) {
+        return itemService.findAll(userId, from, size);
     }
 
     @GetMapping("/{itemId}")
@@ -44,15 +45,18 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> findItemByText(@RequestParam String text) {
+    public List<ItemDto> findItemByText(@RequestParam String text,
+                                        @RequestParam(defaultValue = "0") @Min(0) int from,
+                                        @RequestParam(defaultValue = "20") @Positive int size) {
         log.info("Текст запроса на поиск = {}", text);
-        return itemService.searchItem(text);
+        return itemService.searchItem(text, from, size);
     }
 
     @PatchMapping("/{id}")
     public ItemDto update(@RequestHeader("X-Sharer-User-Id") Long userId,
                           @PathVariable Long id,
                           @RequestBody ItemDto itemDto) {
+        log.info("PATCH user id={}, item id={}", userId, id);
         return itemService.update(itemDto, userId, id);
     }
 

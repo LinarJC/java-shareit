@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDtoForItem;
@@ -19,6 +21,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -28,9 +31,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
+@Slf4j
 public class ItemServiceImpl implements ItemService {
+
     private final ItemRepository itemRepository;
     private final ItemMapper itemMapper;
     private final UserRepository userRepository;
@@ -38,12 +42,13 @@ public class ItemServiceImpl implements ItemService {
     private final BookingMapper bookingMapper;
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Autowired
     public ItemServiceImpl(ItemRepository itemRepository, ItemMapper itemMapper,
                            UserRepository userRepository, BookingRepository bookingRepository,
                            BookingMapper bookingMapper, CommentRepository commentRepository,
-                           CommentMapper commentMapper) {
+                           CommentMapper commentMapper, ItemRequestRepository itemRequestRepository) {
         this.itemRepository = itemRepository;
         this.itemMapper = itemMapper;
         this.userRepository = userRepository;
@@ -51,29 +56,34 @@ public class ItemServiceImpl implements ItemService {
         this.bookingMapper = bookingMapper;
         this.commentRepository = commentRepository;
         this.commentMapper = commentMapper;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     @Override
     public ItemDtoWithBooking findById(Long itemId, long userId) {
+        log.info("Запрошен поиск по itemId: {}", itemId);
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new StorageException("Вещь с ID " + itemId + " не найден"));
+                .orElseThrow(() -> new StorageException("Вещи с Id = " + itemId + " нет в БД"));
         ItemDtoWithBooking itemDtoWithBooking = itemMapper
                 .toItemDtoWithBooking(item);
         if (item.getOwner().getId() == userId) {
             createItemDtoWithBooking(itemDtoWithBooking);
         }
         List<Comment> comments = commentRepository.findAllByItemId(itemId);
-        itemDtoWithBooking.setComments(comments
-                .stream().map(commentMapper::toCommentDto)
-                .collect(Collectors.toList())
-        );
+        if (!comments.isEmpty()) {
+            itemDtoWithBooking.setComments(comments
+                    .stream().map(commentMapper::toCommentDto)
+                    .collect(Collectors.toList()));
+        }
         return itemDtoWithBooking;
     }
 
     @Override
-    public List<ItemDtoWithBooking> findAll(Long userId) {
-        List<ItemDtoWithBooking> result = itemRepository.findAll().stream()
-                .filter(item -> item.getOwner().getId().equals(userId))
+    public List<ItemDtoWithBooking> findAll(Long userId, int from, int size) {
+        log.info("Запрошен поиск item по userId: {}", userId);
+        int page = from / size;
+        Pageable pageable = PageRequest.of(page, size);
+        List<ItemDtoWithBooking> result = itemRepository.findByOwnerId(userId, pageable).stream()
                 .map(itemMapper::toItemDtoWithBooking)
                 .collect(Collectors.toList());
         for (ItemDtoWithBooking itemDtoWithBooking : result) {
@@ -108,40 +118,41 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto save(ItemDto itemDto, Long userId) {
+        log.info("Запрошен метод сохранения item для userId: {}", userId);
         Item item = itemMapper.toItem(itemDto);
-            item.setOwner(userRepository.findById(userId).orElseThrow(() -> new StorageException("Incorrect userId")));
-            return itemMapper.toItemDto(itemRepository.save(item));
+        item.setOwner(userRepository.findById(userId)
+                .orElseThrow(() -> new StorageException("Incorrect userId")));
+        Long requestId = itemDto.getRequestId();
+        if (requestId != null) {
+            item.setItemRequest(itemRequestRepository.findById(requestId)
+                    .orElseThrow(() -> new StorageException("Incorrect RequestId")));
+        }
+        return itemMapper.toItemDto(itemRepository.save(item));
     }
 
     @Override
     public CommentDto saveComment(Long userId, Long itemId, CommentDto commentDto) {
+        log.info("Запрошен метод сохранения comment для вещи: {}", itemId);
         Item item = itemRepository.findById(itemId).orElseThrow(() ->
                 new StorageException("Вещи с Id = " + itemId + " нет в БД"));
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new StorageException("Пользователя с Id = " + userId + " нет в БД"));
-//        Booking booking = new Booking();
-//        booking.setItem(item);
-//        booking.setBooker(user);
-//        booking.setStatus(Status.APPROVED);
-//        Example<Booking> example = Example.of(booking);
-//
-//        if (bookingRepository.exists(example)
-//                && bookingRepository.findOne(example).get().getEnd().isBefore(LocalDateTime.now())) {
-//            throw new BookingException("Пользователь с Id = " + userId + " не брал в аренду вещь с Id = " + itemId);
-//        }
-        if (bookingRepository.searchByBookerIdAndItemIdAndEndIsBefore(userId, itemId, LocalDateTime.now())
-                .stream().noneMatch(booking -> booking.getStatus().equals(Status.APPROVED))
-        ) {
+        List<Booking> bookings = bookingRepository
+                .searchByBookerIdAndItemIdAndEndIsBeforeAndStatus(userId, itemId,
+                        LocalDateTime.now(), Status.APPROVED);
+        if (bookings.isEmpty()) {
             throw new BookingException("Пользователь с Id = " + userId + " не брал в аренду вещь с Id = " + itemId);
         }
         Comment comment = commentMapper.toComment(commentDto);
         comment.setItem(item);
         comment.setAuthor(user);
-        return commentMapper.toCommentDto(commentRepository.save(comment));
+        commentRepository.save(comment);
+        return commentMapper.toCommentDto(comment);
     }
 
     @Override
     public ItemDto update(ItemDto itemDto, long userId, Long id) {
+        log.info("Запрошен метод update ItemId: {}", id);
         try {
             Item oldItem = itemRepository.findById(id).orElseThrow();
 
@@ -156,8 +167,6 @@ public class ItemServiceImpl implements ItemService {
                 if (itemDto.getAvailable() != null) {
                     oldItem.setAvailable(itemDto.getAvailable());
                 }
-                log.info("Внесены изменения в данные вещи: '{}', ID '{}', '{}'",
-                        itemDto.getName(), itemDto.getId(), itemDto.getDescription());
                 return itemMapper.toItemDto(itemRepository.save(oldItem));
             } else {
                 throw new StorageException("Incorrect userId");
@@ -169,13 +178,17 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void deleteById(Long itemId) {
+        log.info("Запрошен метод удаления item по id: {}", itemId);
         itemRepository.deleteById(itemId);
     }
 
     @Override
-    public List<ItemDto> searchItem(String text) {
+    public List<ItemDto> searchItem(String text, int from, int size) {
+        log.info("Запрошен метод поиска item searchItem: {}", text);
+        int page = from / size;
+        Pageable pageable = PageRequest.of(page, size);
         if (!text.isBlank()) {
-            return itemRepository.search(text)
+            return itemRepository.search(text, pageable)
                     .stream()
                     .filter(Item::getAvailable)
                     .map(itemMapper::toItemDto)
