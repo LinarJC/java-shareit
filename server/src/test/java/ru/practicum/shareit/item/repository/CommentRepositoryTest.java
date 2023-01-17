@@ -38,9 +38,9 @@ class CommentRepositoryTest {
 
     @AfterEach
     void afterEach() {
-        userRepository.deleteAll();
-        itemRepository.deleteAll();
         commentRepository.deleteAll();
+        itemRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test

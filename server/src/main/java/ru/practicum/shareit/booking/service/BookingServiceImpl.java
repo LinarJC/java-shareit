@@ -167,9 +167,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> findAllByItemOwnerId(Long userId, String state, int from, int size) {
         log.info("Запрошен поиск по вещи и владельцу: {}", userId);
-        if (!userRepository.existsById(userId)) {
-            throw new StorageException("Incorrect userId");
-        }
+        userRepository.findById(userId).orElseThrow(() -> new StorageException("Incorrect userId"));
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size, Sort.by("start").descending());
         List<BookingDto> result = bookingRepository.searchByItemOwnerId(userId, pageable).stream()
