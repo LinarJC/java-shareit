@@ -36,8 +36,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("select b " +
             "from Booking b left join User as us on b.booker.id = us.id " +
             "where us.id = ?1 " +
-            "and ?2 between b.start and b.end " +
-            "order by b.start DESC")
+            "and ?2 between b.start and b.end ")
     List<Booking> findCurrentByBookerId(long userId, LocalDateTime time,
                                                 Pageable pageable);
 
@@ -45,8 +44,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "from Booking b left join Item as i on b.item.id = i.id " +
             "left join User as us on i.owner.id = us.id " +
             "where us.id = ?1 " +
-            "and ?2 between b.start and b.end " +
-            "order by b.start DESC")
+            "and ?2 between b.start and b.end ")
     List<Booking> findCurrentByItemOwnerId(long userId, LocalDateTime time,
                                                    Pageable pageable);
 
